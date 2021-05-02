@@ -8,7 +8,7 @@ metadata:
 spec:
   interval: 5m
   ref:
-    branch: master
+    branch: main
   secretRef:
     name: flux-ops-ssh-key
   url: ssh://git@github.com/Frizlab/flux-docker-for-mac.git
