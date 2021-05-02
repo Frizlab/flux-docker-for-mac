@@ -1,0 +1,14 @@
+---
+# The flux-ops repository
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  interval: 5m
+  ref:
+    branch: master
+  secretRef:
+    name: flux-ops-ssh-key
+  url: ssh://git@github.com/Frizlab/flux-docker-for-mac.git
