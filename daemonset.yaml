@@ -12,10 +12,6 @@ spec:
       labels:
         name: test-daemon
     spec:
-      tolerations:
-        # this toleration is to have the daemonset runnable on master nodes
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
       containers:
         - name: bash
           image: debian:10-slim
@@ -26,3 +22,8 @@ spec:
             requests:
               cpu: 100m
               memory: 200Mi
+      hostNetwork: true
+      tolerations:
+        # this toleration is to have the daemonset runnable on master nodes
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
