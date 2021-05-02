@@ -23,6 +23,7 @@ spec:
               cpu: 100m
               memory: 200Mi
       hostNetwork: true
+      terminationGracePeriodSeconds: 0
       tolerations:
         # this toleration is to have the daemonset runnable on master nodes
         - key: node-role.kubernetes.io/master
