@@ -15,10 +15,58 @@ resources:
     providers:
       - kms:
           name: sops
-          endpoint: unix:///var/lib/etcd/sops.sock
+          endpoint: unix:///var/lib/sops/sops.sock
           cachesize: 100
           timeout: 3s
       - identity: {}
 ----
 
-Start etcd with `--encryption-provider-config /path/to/conf.yaml`
+Start kube-apiserver with `--encryption-provider-config /path/to/conf.yaml`
+
+=== Docker for Mac
+
+For everything below, create missing folders if needed.
+
+First, go in the Docker for Mac VM:
+[source,bash]
+----
+docker run -it --rm --privileged --pid=host alpine:edge nsenter -t 1 -m -u -n -i sh
+----
+
+Create the `EncryptionConfiguration` above at `/run/config/k8s-encryption/encryption-config.yaml`.
+
+Then edit `/etc/kubernetes/manifests/kube-apiserver.yaml`.
+
+- Add the following in `spec.containers[0].command`:
+[source,yaml]
+----
+    - --encryption-provider-config=/run/config/k8s-encryption/encryption-config.yaml
+----
+- Add the following volume mount paths:
+[source,yaml]
+----
+    - mountPath: /var/lib/sops
+      name: sops
+      readOnly: true
+    - mountPath: /run/config/k8s-encryption
+      name: k8s-encryption
+      readOnly: true
+----
+- Add the following volumes:
+[source,yaml]
+----
+  - hostPath:
+      path: /var/lib/sops
+      type: Directory
+    name: sops
+  - hostPath:
+      path: /run/config/k8s-encryption
+      type: Directory
+    name: k8s-encryption
+----
+
+Launch sops keyservice
+[source,bash]
+----
+GOOS=linux GOARCH=amd64 go build go.mozilla.org/sops/v3/cmd/sops && docker-run-cwd -v "/var/lib/sops:/inside-k8s" debian:10-slim ./sops keyservice --kubernetes --verbose --network unix --address /inside-k8s/sops.sock
+----
