@@ -22,9 +22,17 @@ spec:
             requests:
               cpu: 100m
               memory: 200Mi
+          volumeMounts:
+            - mountPath: /var/lib/etcd
+              name: etcd
       hostNetwork: true
       terminationGracePeriodSeconds: 0
       tolerations:
         # this toleration is to have the daemonset runnable on master nodes
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
+    volumes:
+      - name: etcd
+        hostPath:
+          path: /var/lib/etcd
+          type: Directory
