@@ -31,8 +31,8 @@ spec:
         # this toleration is to have the daemonset runnable on master nodes
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-    volumes:
-      - name: etcd
-        hostPath:
-          path: /var/lib/etcd
-          type: Directory
+      volumes:
+        - name: etcd
+          hostPath:
+            path: /var/lib/etcd
+            type: Directory
