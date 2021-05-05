@@ -1,3 +1,11 @@
+= My Docker for Mac Cluster State
+François Lamboley <fload@me.com>
+
+== Encryption Config
+
+`conf.yaml`:
+[source,yaml]
+----
 ---
 apiVersion: apiserver.config.k8s.io/v1
 kind: EncryptionConfiguration
@@ -11,3 +19,6 @@ resources:
           cachesize: 100
           timeout: 3s
       - identity: {}
+----
+
+Start etcd with `--encryption-provider-config /path/to/conf.yaml`
