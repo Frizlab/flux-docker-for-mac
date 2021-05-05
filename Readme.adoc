@@ -25,6 +25,21 @@ Start kube-apiserver with `--encryption-provider-config /path/to/conf.yaml`
 
 === Docker for Mac
 
+==== Setup
+
+Launch sops keyservice (maybe need to create `/var/lib/sops` inside Docker VM
+first; see later to enter Docker VM):
+[source,bash]
+----
+GOOS=linux GOARCH=amd64 go build go.mozilla.org/sops/v3/cmd/sops && \
+docker-run-cwd \
+   -v "/var/lib/sops:/inside-k8s" \
+   -v "./sops-conf/sops.yaml:/etc/sops/conf.yaml:ro" \
+   -v "./sops-conf/gnupg:/root/.gnupg" \
+   gpg \
+   ./sops --config /etc/sops/conf.yaml keyservice-k8s --verbose --path /inside-k8s/sops.sock
+----
+
 For everything below, create missing folders if needed.
 
 First, go in the Docker for Mac VM:
@@ -65,8 +80,10 @@ Then edit `/etc/kubernetes/manifests/kube-apiserver.yaml`.
     name: k8s-encryption
 ----
 
-Launch sops keyservice
+==== To check secrets are encrypted
+
+Create a new secret, then inside `etcd` pod:
 [source,bash]
 ----
-GOOS=linux GOARCH=amd64 go build go.mozilla.org/sops/v3/cmd/sops && docker-run-cwd -v "/var/lib/sops:/inside-k8s" debian:10-slim ./sops keyservice --kubernetes --verbose --network unix --address /inside-k8s/sops.sock
+ETCDCTL_API=3 etcdctl get --hex --endpoints https://localhost:2379 --cacert /run/config/pki/etcd/ca.crt --key /run/config/pki/etcd/server.key --cert /run/config/pki/etcd/server.crt /registry/secrets/your-secret-ns/your-secret
 ----
